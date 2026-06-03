@@ -9,37 +9,50 @@ config();
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+app.use(
+    cors({
+      origin: function (origin, callback) {
+        const allowedOrigins = [
+          "http://localhost:5173",
+          "https://task-manager-smoky-psi.vercel.app",
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    })
+  );
 
-const corsOptions = {
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+  app.options("*", cors());
 
-app.use(cors(corsOptions));
 app.use(express.json());
-
-app.use("/api/auth", authRoutes);
-app.use("/api/task", taskRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running");
 });
 
+app.use("/api/auth", authRoutes);
+app.use("/api/task", taskRoutes);
+
 const PORT = process.env.PORT || 4500;
 
 const startServer = async () => {
   try {
+    console.log("MONGO_URI exists?", !!process.env.MONGO_URI);
+    console.log("JWT_SECRET exists?", !!process.env.JWT_SECRET);
+
     await connectToDb();
+
     app.listen(PORT, () => {
       console.log(`Server started on PORT ${PORT}`);
     });
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error.message);
+    console.error("Startup error:", error);
     process.exit(1);
   }
 };
