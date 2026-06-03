@@ -4,7 +4,7 @@ A full-stack Task Manager application built using the MERN stack (MongoDB, Expre
 
 
 ## Live DEMO
-task-manager-smoky-psi.vercel.app
+https://task-manager-smoky-psi.vercel.app/login
 
 ## Features
 
